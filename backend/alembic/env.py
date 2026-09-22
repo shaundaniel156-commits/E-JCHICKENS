@@ -1,4 +1,4 @@
-"""Alembic environment — the database URL always comes from the app settings/.env."""
+"""Alembic environment — the database URL comes from an explicit caller, or .env."""
 from logging.config import fileConfig
 
 from alembic import context
@@ -8,7 +8,13 @@ from app.core.config import settings
 from app.models import Base  # noqa: F401  (imports every model into the metadata)
 
 config = context.config
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+
+# An explicit URL (passed in by a caller, e.g. the migration tests) wins;
+# otherwise the application settings / .env decide, so the CLI needs no
+# connection details of its own.
+_configured_url = config.get_main_option("sqlalchemy.url", None)
+DATABASE_URL = _configured_url or settings.DATABASE_URL
+config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
@@ -18,7 +24,7 @@ target_metadata = Base.metadata
 
 def run_migrations_offline() -> None:
     context.configure(
-        url=settings.DATABASE_URL,
+        url=DATABASE_URL,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},

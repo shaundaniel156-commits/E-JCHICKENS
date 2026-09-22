@@ -11,19 +11,61 @@ summary or hard-coded; every number is derived from recorded transactions.
 
 ---
 
+---
+
+## Quickest way to see it running
+
+> **A note first:** opening `frontend/index.html` by double-clicking it shows a
+> **blank white page**. That is expected — it is not a broken file. This is a
+> React application, so its code has to be compiled and served by a small local
+> web server before a browser can display anything. The steps below do that for
+> you.
+
+### Windows
+
+1. Install **[Python 3.11+](https://www.python.org/downloads/)** — on the first
+   installer screen, tick **"Add python.exe to PATH"**.
+2. Install **[Node.js LTS](https://nodejs.org/)** — just click through.
+3. Double-click **`setup.bat`** and wait. It builds everything and adds demo
+   data. You only ever do this once.
+4. Double-click **`start.bat`**. Two windows open and your browser goes to the app.
+
+### macOS / Linux
+
+```bash
+bash setup.sh     # once
+bash start.sh     # every time you want to run it
+```
+
+Then sign in at **<http://localhost:5173>**:
+
+| Email | Password |
+|---|---|
+| `admin@ejchickens.com` | `Admin@12345` |
+
+**You do not need to install MySQL to review the project.** The setup scripts
+use SQLite, which needs no server and no configuration, and the application
+behaves identically. When you are ready to run the farm for real, switch
+`DATABASE_URL` in `backend/.env` to MySQL — see [Installation](#installation).
+
+To stop the app: close the two windows (Windows), or press `Ctrl+C` (macOS/Linux).
+
+---
+
 ## Table of contents
 
-1. [Features](#features)
-2. [Technology stack](#technology-stack)
-3. [System architecture](#system-architecture)
-4. [How the numbers are calculated](#how-the-numbers-are-calculated)
-5. [Installation](#installation)
-6. [Running the application](#running-the-application)
-7. [Seed data and default credentials](#seed-data-and-default-credentials)
-8. [Testing](#testing)
-9. [API documentation](#api-documentation)
-10. [Project structure](#project-structure)
-11. [Troubleshooting](#troubleshooting)
+1. [Quickest way to see it running](#quickest-way-to-see-it-running)
+2. [Features](#features)
+3. [Technology stack](#technology-stack)
+4. [System architecture](#system-architecture)
+5. [How the numbers are calculated](#how-the-numbers-are-calculated)
+6. [Installation](#installation)
+7. [Running the application](#running-the-application)
+8. [Seed data and default credentials](#seed-data-and-default-credentials)
+9. [Testing](#testing)
+10. [API documentation](#api-documentation)
+11. [Project structure](#project-structure)
+12. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -186,6 +228,10 @@ apart.
 git clone <your-repository-url>
 cd ShapeHierarchy
 ```
+
+> If you only want to look at the project, skip to
+> [Quickest way to see it running](#quickest-way-to-see-it-running) — it needs no
+> MySQL. The steps below are for running the farm on MySQL properly.
 
 ### 2. Create the MySQL database
 
@@ -378,7 +424,7 @@ every chart and report to have something to show.
 ```bash
 cd backend
 source .venv/bin/activate
-pytest                 # 87 tests
+pytest                 # 90 tests
 pytest -v              # with test names
 pytest tests/test_financial_calculations.py   # one file
 ```
@@ -401,6 +447,7 @@ TEST_DATABASE_URL="mysql+pymysql://ejfarm:your-password@localhost:3306/ej_chicke
 | `test_feed.py` | Stock arithmetic, negative-stock guards, auto-expenses |
 | `test_validation.py` | Every validation rule, rejected at the API |
 | `test_integration.py` | Data flowing between modules; reports agreeing with the dashboard |
+| `test_migrations.py` | `alembic upgrade head` runs on SQLite, and the migration matches the models |
 
 The three worked examples from the specification are asserted directly:
 
@@ -511,6 +558,17 @@ floating-point number, so no rounding is introduced in transit.
 ---
 
 ## Troubleshooting
+
+**I double-clicked `frontend/index.html` and got a blank white page**
+That is expected, and nothing is broken. `index.html` loads `/src/main.jsx`,
+which is React source code: browsers cannot run it directly, and a `file://`
+page cannot load modules at all. The code has to be compiled and served. Use
+`start.bat` (Windows) or `bash start.sh`, then open <http://localhost:5173>.
+
+**Do I have to install MySQL just to look at the project?**
+No. `setup.bat` / `setup.sh` configure SQLite, which is a single file and needs
+no server. Every feature works the same way. Switch to MySQL only when you are
+ready to run the farm for real.
 
 **`Can't connect to MySQL server` / the health check says `unavailable`**
 Make sure MySQL is running (`sudo systemctl start mysql`, or `brew services

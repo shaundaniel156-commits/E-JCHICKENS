@@ -57,6 +57,7 @@ pnpm-debug.log*
 *.sqlite3
 *.sqlite
 *.db
+backend/ejchickens.db
 *.sql.gz
 *.dump
 
